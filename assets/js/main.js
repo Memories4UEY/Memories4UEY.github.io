@@ -8,8 +8,16 @@
      so we also force it on `pageshow` (fires on that restore too), unless the
      URL itself points at a specific section (a real #anchor should still work). */
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  function forceScrollTop() {
+    if (!location.hash && window.scrollY !== 0) window.scrollTo(0, 0);
+  }
+  /* Some mobile browsers (notably iOS Safari) apply their own scroll
+     restoration slightly AFTER pageshow fires, on the next frame or two —
+     a single reset here can get silently overwritten right after. Repeating
+     it a few times over the following ~500ms wins that race reliably. */
   window.addEventListener('pageshow', () => {
-    if (!location.hash) window.scrollTo(0, 0);
+    forceScrollTop();
+    [0, 50, 150, 300, 500].forEach((delay) => setTimeout(forceScrollTop, delay));
   });
 
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

@@ -71,6 +71,12 @@ html {
   font-size: var(--fs-base);
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
+  /* Stop the browser from auto-adjusting scroll position as images/fonts
+     load in and shift the layout above the fold — this is the far more
+     likely cause of a "lands near the bottom" jump on a fresh load than
+     history scroll-restoration, since it happens even in a clean private
+     session with no prior history at all. */
+  overflow-anchor: none;
 }
 body {
   min-height: 100dvh;
