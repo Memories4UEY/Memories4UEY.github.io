@@ -3,19 +3,24 @@
 
   /* Stop the browser from re-scrolling to wherever the visitor was on their
      last visit/reload — a fresh page load should always start at the top.
-     `scrollRestoration` alone isn't enough on iOS Safari, which often restores
-     the page from its back-forward cache instead of re-running this script,
-     so we also force it on `pageshow` (fires on that restore too), unless the
-     URL itself points at a specific section (a real #anchor should still work). */
+     The real-world trigger: clicking a nav link like "שאלות נפוצות" puts
+     `#faq` in the address bar (needed for that in-page scroll to work), and
+     it just stays there — so a later plain reload legitimately re-jumps to
+     that anchor, which is correct browser behavior but not what a visitor
+     expects from "refresh". We clear the stale hash on load/restore and
+     force scroll to the top, every time, no exceptions. */
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   function forceScrollTop() {
-    if (!location.hash && window.scrollY !== 0) window.scrollTo(0, 0);
+    if (window.scrollY !== 0) window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }
   /* Some mobile browsers (notably iOS Safari) apply their own scroll
      restoration slightly AFTER pageshow fires, on the next frame or two —
      a single reset here can get silently overwritten right after. Repeating
      it a few times over the following ~500ms wins that race reliably. */
   window.addEventListener('pageshow', () => {
+    if (location.hash) {
+      try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* ignore */ }
+    }
     forceScrollTop();
     [0, 50, 150, 300, 500].forEach((delay) => setTimeout(forceScrollTop, delay));
   });
