@@ -2,8 +2,15 @@
   'use strict';
 
   /* Stop the browser from re-scrolling to wherever the visitor was on their
-     last visit/reload — a fresh page load should always start at the top. */
+     last visit/reload — a fresh page load should always start at the top.
+     `scrollRestoration` alone isn't enough on iOS Safari, which often restores
+     the page from its back-forward cache instead of re-running this script,
+     so we also force it on `pageshow` (fires on that restore too), unless the
+     URL itself points at a specific section (a real #anchor should still work). */
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  window.addEventListener('pageshow', () => {
+    if (!location.hash) window.scrollTo(0, 0);
+  });
 
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
