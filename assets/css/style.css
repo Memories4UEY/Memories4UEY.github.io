@@ -400,16 +400,33 @@ section { padding-block: var(--space-8); }
 }
 .hero-copy p.lead { font-size: 1.15rem; margin-block: var(--space-4); max-width: 46ch; }
 .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin-top: var(--space-5); }
-.hero-social-btn {
-  width: 48px; height: 48px;
-  display: flex; align-items: center; justify-content: center;
-  transition: transform var(--dur-fast) var(--ease-standard);
+.hero-qr-row { display: flex; flex-wrap: wrap; gap: var(--space-6); margin-top: var(--space-6); }
+.hero-qr { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+/* The QR has no white card/background at all — the PNG itself is drawn with
+   transparent "light" modules and gold "dark" modules, so the page's own
+   dark background shows straight through it. This is a reverse-polarity QR:
+   modern phone camera scanners (iOS/Android) read it fine since there's
+   still strong light/dark contrast, just inverted from the classic
+   black-on-white style — worth a real scan test on your own phone since a
+   few older third-party QR apps expect the classic polarity and may not. */
+.hero-qr img { width: 128px; height: 128px; transition: transform var(--dur-fast) var(--ease-standard); }
+.hero-qr:hover img { transform: scale(1.03); }
+.hero-qr-caption { display: flex; align-items: center; gap: 6px; }
+.hero-qr-icon { width: 22px; height: 22px; flex-shrink: 0; }
+.hero-qr-icon .icon-brand { width: 22px; height: 22px; }
+.hero-qr-label { font-size: 0.92rem; font-weight: 600; color: var(--color-text-muted); }
+.hero-qr:hover .hero-qr-label { color: var(--color-gold); }
+@media (max-width: 480px) {
+  .hero-qr-row { gap: var(--space-4); justify-content: space-between; }
+  .hero-qr img { width: 92px; height: 92px; }
+  .hero-qr-icon { width: 18px; height: 18px; }
+  .hero-qr-icon .icon-brand { width: 18px; height: 18px; }
+  .hero-qr-label { font-size: 0.8rem; }
 }
-.hero-social-btn:hover { transform: translateY(-2px) scale(1.05); }
-.hero-social-btn .icon-brand { width: 48px; height: 48px; border-radius: var(--radius-md); }
 .hero-tags { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-6); }
 .hero-tag {
-  display: inline-flex; align-items: center; gap: var(--space-2);
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  width: 162px;
   padding: 8px 16px; border-radius: var(--radius-pill);
   border: 1px solid var(--color-border); color: var(--color-text-muted);
   font-size: 0.92rem; font-weight: 500;
@@ -1002,8 +1019,8 @@ textarea.form-control { min-height: 120px; resize: vertical; }
   z-index: 90;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 12px;
+  align-items: flex-start;
+  gap: 10px;
 }
 
 /* ---------- Cookie / local-storage notice ---------- */
@@ -1029,10 +1046,57 @@ textarea.form-control { min-height: 120px; resize: vertical; }
 .cookie-banner p a { color: var(--color-gold); text-decoration: underline; }
 .cookie-banner-btn { flex-shrink: 0; min-height: 44px; padding: 10px 22px; }
 @media (max-width: 480px) {
-  /* clear the floating Instagram/TikTok/WhatsApp/accessibility column at bottom-left */
-  .cookie-banner { bottom: 250px; padding: var(--space-3); }
+  /* clear the collapsed contact-toggle + accessibility pills at bottom-left
+     (now just 2 small buttons, not the full fan, since it collapses behind
+     the contact toggle below 1101px) */
+  .cookie-banner { bottom: 130px; padding: var(--space-3); }
   .cookie-banner-btn { width: 100%; }
 }
+
+/* ---------- Floating quick-contact fan ---------- */
+/* Below 1101px this is a collapsed popover behind .contact-toggle (matches
+   the accessibility panel's own open/close mechanism in main.js — see
+   'Contact widget toggle' there). At 1101px+ it's always visible, unchanged
+   from the original always-open fan. */
+.contact-widget { position: relative; }
+.float-fan {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 10px;
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 0;
+}
+.float-fan[hidden] { display: none; }
+.float-chip {
+  display: flex; align-items: center; gap: 10px;
+  width: 138px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding-inline-start: 4px;
+  padding-inline-end: 16px;
+  padding-block: 4px;
+  box-shadow: var(--shadow-md);
+  transition: transform var(--dur-fast) var(--ease-standard), border-color var(--dur-fast) var(--ease-standard);
+}
+.float-chip:hover { border-color: var(--color-gold); box-shadow: var(--shadow-lg); }
+.float-chip-icon { width: 36px; height: 36px; flex-shrink: 0; display: flex; }
+.float-chip-icon .icon-brand { width: 36px; height: 36px; }
+.float-chip-label { font-size: 0.85rem; font-weight: 600; color: var(--color-text); white-space: nowrap; }
+/* Fan/staircase layout instead of a plain straight column — each chip below
+   the previous one is nudged further from the screen edge. translateX is used
+   (not margin-left) because in this RTL page, flex align-items:flex-start
+   anchors the OPPOSITE edge of a column's items, which silently defeated a
+   margin-based stagger — a transform offset is a fixed physical pixel move
+   regardless of that. */
+.float-fan .float-chip:nth-child(1) { transform: translateX(80px); }
+.float-fan .float-chip:nth-child(2) { transform: translateX(64px); }
+.float-fan .float-chip:nth-child(3) { transform: translateX(48px); }
+.float-fan .float-chip:nth-child(4) { transform: translateX(32px); }
+.float-fan .float-chip:nth-child(5) { transform: translateX(16px); }
+/* The accessibility button sits right below the fan (its own always-visible
+   element, not part of the collapsible panel) — flush at translateX(0),
+   continuing the same diagonal the chips above it build up from. */
+.float-stack .a11y-widget { transform: translateX(0); }
 
 /* ---------- Accessibility widget ---------- */
 .a11y-widget {
@@ -1045,19 +1109,42 @@ textarea.form-control { min-height: 120px; resize: vertical; }
    is already fixed-positioned — the widget just needs to be a relative
    anchor for its own popover panel */
 .float-stack .a11y-widget { position: relative; bottom: auto; left: auto; }
-.a11y-toggle {
-  width: 56px; height: 56px;
-  border-radius: 50%;
+.a11y-toggle, .contact-toggle {
+  height: 44px;
+  width: 138px;
+  border-radius: var(--radius-pill);
   background: var(--color-gold);
   color: var(--color-gold-deep);
   border: none;
-  display: flex; align-items: center; justify-content: center;
+  display: flex; align-items: center; gap: 10px;
+  padding-inline-start: 4px;
+  padding-inline-end: 16px;
   box-shadow: var(--shadow-lg);
   cursor: pointer;
   transition: transform var(--dur-fast) var(--ease-standard);
 }
-.a11y-toggle:hover { transform: scale(1.06); }
-.a11y-toggle .icon { width: 30px; height: 30px; }
+.a11y-toggle:hover, .contact-toggle:hover { transform: scale(1.06); }
+.a11y-toggle-icon {
+  width: 36px; height: 36px; flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.12);
+  display: flex; align-items: center; justify-content: center;
+}
+.a11y-toggle .icon, .contact-toggle .icon { width: 20px; height: 20px; }
+.a11y-toggle-label { font-size: 0.85rem; font-weight: 700; white-space: nowrap; }
+
+@media (min-width: 1101px) {
+  /* Confirmed bug-free at desktop widths with the full fan always open —
+     skip the toggle/popover mechanism entirely here. Placed after the base
+     .contact-toggle/.float-fan rules on purpose: same-specificity CSS rules
+     resolve by source order, so this must come later to actually win. */
+  .contact-toggle { display: none; }
+  .float-fan {
+    position: static;
+    bottom: auto; left: auto;
+  }
+  .float-fan[hidden] { display: flex !important; }
+}
 
 .a11y-panel {
   position: absolute;
@@ -1121,8 +1208,6 @@ textarea.form-control { min-height: 120px; resize: vertical; }
 }
 
 @media (max-width: 480px) {
-  .a11y-toggle { width: 48px; height: 48px; }
-  .a11y-toggle .icon { width: 26px; height: 26px; }
   .a11y-panel { width: calc(100vw - 32px); max-width: 300px; }
 }
 

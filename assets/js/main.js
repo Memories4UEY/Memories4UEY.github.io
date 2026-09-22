@@ -126,6 +126,33 @@
     });
   })();
 
+  /* ---------------- Contact widget toggle (collapses below 1101px) ---------------- */
+  (() => {
+    const toggle = document.querySelector('.contact-toggle');
+    const fan = document.getElementById('contact-fan');
+    if (!toggle || !fan) return;
+
+    function closeFan() {
+      fan.hidden = true;
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+    function openFan() {
+      fan.hidden = false;
+      toggle.setAttribute('aria-expanded', 'true');
+    }
+
+    toggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      fan.hidden ? openFan() : closeFan();
+    });
+    document.addEventListener('click', (e) => {
+      if (!fan.hidden && !fan.contains(e.target) && e.target !== toggle) closeFan();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !fan.hidden) { closeFan(); toggle.focus(); }
+    });
+  })();
+
   /* ---------------- Brand logo dropdown (Instagram / WhatsApp) ---------------- */
   document.querySelectorAll('.brand-wrap').forEach((wrap) => {
     const btn = wrap.querySelector('.brand');
